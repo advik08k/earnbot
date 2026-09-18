@@ -187,14 +187,14 @@ RULES: Max 70 words. Natural, human, conversational. No robotic templates.
 # 3. AI DM REPLY ENGINE
 # -------------------------------------------------------------
 
-def get_best_model(client, fallback='gemini-2.0-flash'):
+def get_best_model(client, fallback='gemini-3.6-flash'):
     try:
         available = [m.name for m in client.models.list() if hasattr(m, 'supported_actions') and 'generateContent' in m.supported_actions]
         # Clean prefix
         available_names = [m.replace('models/', '') for m in available]
         
         # Priority list
-        preferred = ['gemini-2.0-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-flash', 'gemini-2.5-flash', 'gemini-flash']
+        preferred = ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-2.5-flash']
         for p in preferred:
             if p in available_names:
                 return p
@@ -202,7 +202,7 @@ def get_best_model(client, fallback='gemini-2.0-flash'):
         # Fallback to any flash that is NOT omni (omni has 0 quota on free tier often)
         flash_models = [m for m in available_names if 'flash' in m.lower() and 'omni' not in m.lower()]
         if flash_models:
-            return sorted(flash_models)[0]
+            return sorted(flash_models, reverse=True)[0]
     except Exception as e:
         print(f"[Model Discovery Error] {e}")
     return fallback
