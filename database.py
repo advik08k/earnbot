@@ -123,6 +123,12 @@ def init_db():
             update_settings(cloud['settings'])
         if 'campaigns' in cloud:
             _restore_campaigns(cloud['campaigns'])
+        if 'leads' in cloud:
+            _restore_data('leads', cloud['leads'])
+        if 'messages' in cloud:
+            _restore_data('messages', cloud['messages'])
+        if 'content_items' in cloud:
+            _restore_data('content_items', cloud['content_items'])
 
 
 # --- Settings Helpers ---
@@ -174,6 +180,25 @@ def _sync_to_github():
     except Exception as e:
         print(f"[GitHub DB Sync Error] {e}")
 
+
+
+def _restore_data(table, data_list):
+    if not data_list: return
+    conn = get_connection()
+    c = conn.cursor()
+    # Get columns dynamically
+    columns = data_list[0].keys()
+    cols_str = ", ".join(columns)
+    placeholders = ", ".join(["?"] * len(columns))
+    
+    for row in data_list:
+        values = tuple(row[col] for col in columns)
+        try:
+            c.execute(f"INSERT OR IGNORE INTO {table} ({cols_str}) VALUES ({placeholders})", values)
+        except Exception as e:
+            print(f"[Restore Error {table}] {e}")
+    conn.commit()
+    conn.close()
 
 def _restore_campaigns(campaigns: list):
     """Restore campaigns from GitHub cloud DB into local SQLite."""
