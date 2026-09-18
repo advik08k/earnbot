@@ -12,7 +12,7 @@ _last_fetch_time = 0
 def get_drive_products():
     global _cached_products, _last_fetch_time
     
-    if time.time() - _last_fetch_time < 600 and _cached_products:
+    if time.time() - _last_fetch_time < 3600 and _cached_products:
         return _cached_products
 
     creds_path = 'credentials.json'
