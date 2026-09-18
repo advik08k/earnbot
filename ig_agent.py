@@ -236,7 +236,10 @@ class InstagramAgencyAgent:
                 database.update_lead(thread.id, stage='PITCHED')
 
         if not reply_text:
-            print(f"[Agent] AI returned empty (likely error). Skipping reply to @{username} to avoid spam/crashes.")
+            print(f"[Agent] AI returned empty (likely error). Skipping reply to @{username}.")
+            # Remove from checked so we can retry on the next poll cycle when API is back up
+            if msg_id in self.last_checked_msg_ids:
+                self.last_checked_msg_ids.remove(msg_id)
             return
 
         # 6. Simulate human typing delay (2.5 - 4.5 seconds)
