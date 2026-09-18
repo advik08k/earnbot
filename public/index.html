@@ -1097,6 +1097,14 @@
                             <div style="font-size: 0.75rem; color: var(--text-muted);" id="chatStageTag">No lead active</div>
                         </div>
                     </div>
+                    <div id="paymentActions" style="display: none; gap: 10px; margin-right: 15px;">
+                        <button class="btn-primary" onclick="approvePayment()" style="background: linear-gradient(135deg, #10b981, #059669);">
+                            <i data-lucide="check-circle" style="width: 14px; height: 14px;"></i> Approve
+                        </button>
+                        <button class="btn-secondary" onclick="rejectPayment()" style="color: #ef4444; border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.1);">
+                            <i data-lucide="x-circle" style="width: 14px; height: 14px;"></i> Reject
+                        </button>
+                    </div>
                     <div id="chatActions" style="display: none;">
                         <button class="btn-secondary" id="fulfillBtn" style="color: #34d399; border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.1);">
                             <i data-lucide="zap" style="width: 14px; height: 14px;"></i>
