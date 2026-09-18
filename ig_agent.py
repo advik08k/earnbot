@@ -235,6 +235,10 @@ class InstagramAgencyAgent:
             elif current_stage == 'DISCOVERY' and len(history) >= 4:
                 database.update_lead(thread.id, stage='PITCHED')
 
+        if not reply_text:
+            print(f"[Agent] AI returned empty (likely error). Skipping reply to @{username} to avoid spam/crashes.")
+            return
+
         # 6. Simulate human typing delay (2.5 - 4.5 seconds)
         print(f"[Agent] Replying to @{username} in simulated typing...")
         time.sleep(random.uniform(2.5, 4.5))
