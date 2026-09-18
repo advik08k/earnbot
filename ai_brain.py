@@ -151,7 +151,7 @@ def call_groq_api(api_key: str, system_prompt: str, raw_messages: list, temperat
     import time
     for attempt in range(2):
         try:
-            resp = requests.post(url, headers=headers, json=payload, timeout=90)
+            resp = requests.post(url, headers=headers, json=payload, timeout=25)
             resp.raise_for_status()
             return resp.json()["choices"][0]["message"]["content"].strip()
         except Exception as e:
@@ -239,7 +239,7 @@ def call_groq_simple(api_key: str, prompt: str, temperature: float = 0.75) -> st
     }
     import requests
     try:
-        resp = requests.post(url, headers=headers, json=payload, timeout=90)
+        resp = requests.post(url, headers=headers, json=payload, timeout=25)
         resp.raise_for_status()
         return resp.json()["choices"][0]["message"]["content"].strip()
     except Exception as e:
@@ -264,7 +264,7 @@ def call_jugaad_api(system_prompt: str, raw_messages: list, temperature: float =
     import time
     for attempt in range(2):
         try:
-            resp = requests.post(url, json=payload, timeout=90)
+            resp = requests.post(url, json=payload, timeout=25)
             resp.raise_for_status()
             return resp.text.strip()
         except Exception as e:
