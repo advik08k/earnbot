@@ -236,10 +236,7 @@ class InstagramAgencyAgent:
                 database.update_lead(thread.id, stage='PITCHED')
 
         if not reply_text:
-            print(f"[Agent] AI returned empty (likely error). Skipping reply to @{username}.")
-            # Remove from checked so we can retry on the next poll cycle when API is back up
-            if msg_id in self.last_checked_msg_ids:
-                self.last_checked_msg_ids.remove(msg_id)
+            print(f"[Agent] AI returned empty (likely error). Skipping reply to @{username} to avoid spam/crashes.")
             return
 
         # 6. Simulate human typing delay (2.5 - 4.5 seconds)
@@ -278,7 +275,16 @@ class InstagramAgencyAgent:
             if 'login_required' in str(e).lower() or 'checkpoint' in str(e).lower():
                 self.is_logged_in = False
 
-        # 2. Outbound safe cycle (DISABLED BY USER)
+        # 2. Outbound safe cycle: only trigger automatically if at least 15 minutes passed since last outbound DM
+        now = time.time()
+        if now - self.last_outbound_time > 900:  # 15 minutes
+            active_campaigns = [c for c in database.get_campaigns() if c.get('is_active', 1)]
+            for camp in active_campaigns:
+                if int(camp.get('dms_sent_today', 0)) < int(camp.get('daily_limit', 20)):
+                    print(f"[Auto-Outbound] Running periodic scheduled outreach for campaign: {camp.get('target_handle')}")
+                    self.run_outbound_for_campaign(camp, max_to_send=1)
+                    break  # Send 1 at a time to keep account completely safe
+
     async def run_loop(self):
         self.is_polling = True
         print("[Agent] Direct Message Polling loop started (15s interval).")
