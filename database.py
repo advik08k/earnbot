@@ -146,11 +146,31 @@ def update_settings(data: dict):
 
 
 def _sync_to_github():
-    """Collect all settings + campaigns and push to GitHub."""
+    """Collect all data and push to GitHub."""
     try:
         settings = get_settings()
         campaigns = get_campaigns()
-        github_db.save_to_github({'settings': settings, 'campaigns': campaigns})
+        
+        # Backup leads and messages too
+        conn = get_connection()
+        c = conn.cursor()
+        c.execute('SELECT * FROM leads')
+        leads = [dict(r) for r in c.fetchall()]
+        
+        c.execute('SELECT * FROM messages')
+        messages = [dict(r) for r in c.fetchall()]
+        
+        c.execute('SELECT * FROM content_items')
+        content_items = [dict(r) for r in c.fetchall()]
+        conn.close()
+        
+        github_db.save_to_github({
+            'settings': settings, 
+            'campaigns': campaigns,
+            'leads': leads,
+            'messages': messages,
+            'content_items': content_items
+        })
     except Exception as e:
         print(f"[GitHub DB Sync Error] {e}")
 

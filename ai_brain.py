@@ -42,7 +42,7 @@ RULES:
 """
     try:
         response = client.models.generate_content(
-            model='gemini-3.6-flash',
+            model=get_best_model(client, 'gemini-2.0-flash'),
             contents=[types.Content(role="user", parts=[types.Part.from_text(text=prompt)])],
             config=types.GenerateContentConfig(temperature=0.8)
         )
@@ -186,6 +186,16 @@ RULES: Max 70 words. Natural, human, conversational. No robotic templates.
 # -------------------------------------------------------------
 # 3. AI DM REPLY ENGINE
 # -------------------------------------------------------------
+
+def get_best_model(client, fallback='gemini-1.5-flash'):
+    try:
+        models = [m.name for m in client.models.list() if 'flash' in m.name.lower() and 'generateContent' in m.supported_actions]
+        if models:
+            return sorted(models, reverse=True)[0]
+    except Exception as e:
+        print(f"[Model Discovery Error] {e}")
+    return fallback
+
 def generate_ai_reply(lead: dict, chat_history: list, incoming_msg: str, campaign: dict = None, upi_id: str = "confusedaryan@fam", default_price: str = "₹1,999", api_key: str = None) -> str:
     client = get_genai_client(api_key)
     upi = (campaign.get('upi_id') if campaign else None) or upi_id
@@ -196,22 +206,39 @@ def generate_ai_reply(lead: dict, chat_history: list, incoming_msg: str, campaig
     
     system_instruction = build_system_prompt(lead, campaign, upi, price)
     
-    contents = []
+    # 1. Gather all messages
+    raw_messages = []
     for msg in chat_history:
         role = "user" if msg['sender'] == 'user' else "model"
-        contents.append(types.Content(
-            role=role,
-            parts=[types.Part.from_text(text=msg['text'])]
-        ))
+        raw_messages.append({"role": role, "text": msg['text']})
         
-    contents.append(types.Content(
-        role="user",
-        parts=[types.Part.from_text(text=incoming_msg)]
-    ))
+    raw_messages.append({"role": "user", "text": incoming_msg})
+    
+    # 2. Merge consecutive messages of the same role (Gemini requires strict alternating roles)
+    merged_messages = []
+    for msg in raw_messages:
+        if not merged_messages:
+            merged_messages.append(msg)
+        else:
+            if merged_messages[-1]["role"] == msg["role"]:
+                merged_messages[-1]["text"] += "\n\n" + msg["text"]
+            else:
+                merged_messages.append(msg)
+                
+    # 3. Build contents array
+    contents = []
+    for msg in merged_messages:
+        contents.append(types.Content(
+            role=msg["role"],
+            parts=[types.Part.from_text(text=msg["text"])]
+        ))
     
     try:
+        # We must use a valid model. Let's dynamically find it or fallback
+        model_name = get_best_model(client, fallback='gemini-2.0-flash') # Default to a strong standard
+        
         response = client.models.generate_content(
-            model='gemini-3.6-flash',
+            model=model_name,
             contents=contents,
             config=types.GenerateContentConfig(
                 system_instruction=system_instruction,
@@ -290,7 +317,7 @@ Make it practical, structured, and immediately useful. Around 350-450 words.
 
     try:
         response = client.models.generate_content(
-            model='gemini-3.6-flash',
+            model=get_best_model(client, 'gemini-2.0-flash'),
             contents=[types.Content(role="user", parts=[types.Part.from_text(text=prompt)])],
             config=types.GenerateContentConfig(temperature=0.7)
         )
@@ -346,7 +373,7 @@ REQUIREMENTS:
 
     try:
         response = client.models.generate_content(
-            model='gemini-3.6-flash',
+            model=get_best_model(client, 'gemini-2.0-flash'),
             contents=[types.Content(role="user", parts=[types.Part.from_text(text=prompt)])],
             config=types.GenerateContentConfig(temperature=0.85)
         )
