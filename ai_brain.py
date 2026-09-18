@@ -186,9 +186,7 @@ def generate_ai_reply(lead: dict, chat_history: list, incoming_msg: str, campaig
             merged_messages.append(msg_copy)
         else:
             if merged_messages[-1]["role"] == msg_copy["role"]:
-                merged_messages[-1]["text"] += "
-
-" + msg_copy["text"]
+                merged_messages[-1]["text"] += "\n\n" + msg_copy["text"]
             else:
                 merged_messages.append(msg_copy)
                 
