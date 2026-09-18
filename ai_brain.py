@@ -248,31 +248,54 @@ def call_groq_simple(api_key: str, prompt: str, temperature: float = 0.75) -> st
 
 
 def call_jugaad_api(system_prompt: str, raw_messages: list, temperature: float = 0.75) -> str:
-    url = "https://text.pollinations.ai/"
-    
+    """Race multiple free AI endpoints simultaneously. First one to reply wins!"""
+    import requests
+    import concurrent.futures
+
     payload_messages = [{"role": "system", "content": system_prompt}]
     for msg in raw_messages:
         payload_messages.append({"role": msg["role"], "content": msg["text"]})
-        
-    payload = {
-        "model": "openai",
-        "messages": payload_messages,
-        "temperature": temperature
-    }
-    
-    import requests
-    import time
-    for attempt in range(2):
-        try:
-            resp = requests.post(url, json=payload, timeout=25)
-            resp.raise_for_status()
-            return resp.text.strip()
-        except Exception as e:
-            if attempt == 0:
-                time.sleep(2)
+
+    def try_pollinations_openai():
+        r = requests.post("https://text.pollinations.ai/", json={
+            "model": "openai", "messages": payload_messages, "temperature": temperature
+        }, timeout=20)
+        r.raise_for_status()
+        return r.text.strip()
+
+    def try_pollinations_mistral():
+        r = requests.post("https://text.pollinations.ai/", json={
+            "model": "mistral", "messages": payload_messages, "temperature": temperature
+        }, timeout=20)
+        r.raise_for_status()
+        t = r.text.strip()
+        if t and not t.startswith('{'):
+            return t
+        raise Exception("Empty or invalid response")
+
+    def try_pollinations_claude():
+        r = requests.post("https://text.pollinations.ai/", json={
+            "model": "claude", "messages": payload_messages, "temperature": temperature
+        }, timeout=20)
+        r.raise_for_status()
+        t = r.text.strip()
+        if t and not t.startswith('{'):
+            return t
+        raise Exception("Empty or invalid response")
+
+    funcs = [try_pollinations_openai, try_pollinations_mistral, try_pollinations_claude]
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        futures = {executor.submit(fn): fn.__name__ for fn in funcs}
+        for future in concurrent.futures.as_completed(futures, timeout=22):
+            try:
+                result = future.result()
+                if result:
+                    return result
+            except Exception:
                 continue
-            print(f"[Jugaad Error] {e}")
-            return ""
+
+    print("[Jugaad Error] All parallel attempts failed")
     return ""
 
 def generate_digital_product(lead: dict, campaign: dict = None, api_key: str = None) -> str:
