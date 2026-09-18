@@ -40,6 +40,14 @@ RULES:
 4. End with a simple, low-friction, open-ended question that is very easy to reply to.
 5. Maximum 35 words. Return ONLY the message text.
 """
+    if api_key and api_key.startswith("gsk_"):
+        res = call_groq_simple(api_key, prompt, 0.7)
+        if res: return res
+        
+    if api_key and api_key.startswith("gsk_"):
+        res = call_groq_simple(api_key, prompt, 0.85)
+        if res: return res
+        
     try:
         response = client.models.generate_content(
             model=get_best_model(client, 'gemini-2.0-flash'),
@@ -112,64 +120,123 @@ def get_best_model(client, fallback='gemini-3.6-flash'):
         print(f"[Model Discovery Error] {e}")
     return fallback
 
+
+import requests
+
+def call_groq_api(api_key: str, system_prompt: str, raw_messages: list, temperature: float = 0.75) -> str:
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    
+    payload_messages = [{"role": "system", "content": system_prompt}]
+    for msg in raw_messages:
+        payload_messages.append({"role": msg["role"], "content": msg["text"]})
+        
+    payload = {
+        "model": "llama-3.1-70b-versatile",
+        "messages": payload_messages,
+        "temperature": temperature
+    }
+    
+    import time
+    for attempt in range(2):
+        try:
+            resp = requests.post(url, headers=headers, json=payload, timeout=15)
+            resp.raise_for_status()
+            return resp.json()["choices"][0]["message"]["content"].strip()
+        except Exception as e:
+            if attempt == 0:
+                time.sleep(2)
+                continue
+            print(f"[Groq Error] {e}")
+            if hasattr(e, 'response') and e.response:
+                print(e.response.text)
+            return ""
+    return ""
+
 def generate_ai_reply(lead: dict, chat_history: list, incoming_msg: str, campaign: dict = None, upi_id: str = "confusedaryan@fam", default_price: str = "₹1,999", api_key: str = None) -> str:
-    client = get_genai_client(api_key)
     upi = (campaign.get('upi_id') if campaign else None) or upi_id
     price = (campaign.get('price') if campaign else None) or default_price
     
-    if not client:
-        return ""
-    
     system_instruction = build_system_prompt(lead, campaign, upi, price)
     
-    # 1. Gather all messages
     raw_messages = []
     for msg in chat_history:
-        role = "user" if msg['sender'] == 'user' else "model"
+        role = "user" if msg['sender'] == 'user' else "assistant" if (api_key and api_key.startswith('gsk_')) else "model"
         raw_messages.append({"role": role, "text": msg['text']})
         
     raw_messages.append({"role": "user", "text": incoming_msg})
     
-    # 2. Merge consecutive messages of the same role (Gemini requires strict alternating roles)
+    if api_key and api_key.startswith("gsk_"):
+        return call_groq_api(api_key, system_instruction, raw_messages, temperature=0.75)
+        
+    # GEMINI LOGIC
+    client = get_genai_client(api_key)
+    if not client:
+        return ""
+        
+    # Merge for Gemini
     merged_messages = []
     for msg in raw_messages:
+        msg_copy = dict(msg)
+        if msg_copy["role"] == "assistant": msg_copy["role"] = "model"
         if not merged_messages:
-            merged_messages.append(msg)
+            merged_messages.append(msg_copy)
         else:
-            if merged_messages[-1]["role"] == msg["role"]:
-                merged_messages[-1]["text"] += "\n\n" + msg["text"]
+            if merged_messages[-1]["role"] == msg_copy["role"]:
+                merged_messages[-1]["text"] += "
+
+" + msg_copy["text"]
             else:
-                merged_messages.append(msg)
+                merged_messages.append(msg_copy)
                 
-    # 3. Build contents array
     contents = []
     for msg in merged_messages:
-        contents.append(types.Content(
-            role=msg["role"],
-            parts=[types.Part.from_text(text=msg["text"])]
-        ))
+        contents.append(types.Content(role=msg["role"], parts=[types.Part.from_text(text=msg["text"])]))
     
     try:
-        # We must use a valid model. Let's dynamically find it or fallback
-        model_name = get_best_model(client, fallback='gemini-2.0-flash') # Default to a strong standard
-        
-        response = client.models.generate_content(
-            model=model_name,
-            contents=contents,
-            config=types.GenerateContentConfig(
-                system_instruction=system_instruction,
-                temperature=0.75,
-            )
-        )
-        return response.text.strip()
+        model_name = get_best_model(client, fallback='gemini-3.6-flash')
+        import time
+        for attempt in range(2):
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=contents,
+                    config=types.GenerateContentConfig(system_instruction=system_instruction, temperature=0.75)
+                )
+                return response.text.strip()
+            except Exception as inner_e:
+                if '503' in str(inner_e) and attempt == 0:
+                    print(f"[AI Chat 503] Retrying after 2s...")
+                    time.sleep(2)
+                    continue
+                raise inner_e
     except Exception as e:
         print(f"[AI Chat Error] {e}")
         return ""
 
-
 # -------------------------------------------------------------
 # 4. INSTANT DIGITAL FULFILLMENT / BLUEPRINT GENERATOR
 # -------------------------------------------------------------
+def call_groq_simple(api_key: str, prompt: str, temperature: float = 0.75) -> str:
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    payload = {
+        "model": "llama-3.1-70b-versatile",
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": temperature
+    }
+    import requests
+    try:
+        resp = requests.post(url, headers=headers, json=payload, timeout=15)
+        resp.raise_for_status()
+        return resp.json()["choices"][0]["message"]["content"].strip()
+    except Exception as e:
+        print(f"[Groq Simple Error] {e}")
+        return ""
+
 def generate_digital_product(lead: dict, campaign: dict = None, api_key: str = None) -> str:
     """Generates the comprehensive deliverable once payment/advance is confirmed."""
     client = get_genai_client(api_key)
@@ -231,6 +298,14 @@ Offer: {campaign.get('offer_title', 'Agency Blueprint') if campaign else 'Agency
 Make it practical, structured, and immediately useful. Around 350-450 words.
 """
 
+    if api_key and api_key.startswith("gsk_"):
+        res = call_groq_simple(api_key, prompt, 0.7)
+        if res: return res
+        
+    if api_key and api_key.startswith("gsk_"):
+        res = call_groq_simple(api_key, prompt, 0.85)
+        if res: return res
+        
     try:
         response = client.models.generate_content(
             model=get_best_model(client, 'gemini-2.0-flash'),
@@ -287,6 +362,14 @@ REQUIREMENTS:
 8. Return ONLY the final caption text — no preamble, no explanations.
 """
 
+    if api_key and api_key.startswith("gsk_"):
+        res = call_groq_simple(api_key, prompt, 0.7)
+        if res: return res
+        
+    if api_key and api_key.startswith("gsk_"):
+        res = call_groq_simple(api_key, prompt, 0.85)
+        if res: return res
+        
     try:
         response = client.models.generate_content(
             model=get_best_model(client, 'gemini-2.0-flash'),
