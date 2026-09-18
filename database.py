@@ -1,6 +1,8 @@
 import sqlite3
 import os
 import time
+import threading
+import github_db
 
 DB_PATH = os.path.join(os.path.dirname(__file__), 'agency.db')
 
@@ -114,6 +116,15 @@ def init_db():
     conn.commit()
     conn.close()
 
+    # Load cloud DB from GitHub and override local defaults
+    cloud = github_db.load_from_github()
+    if cloud:
+        if 'settings' in cloud:
+            update_settings(cloud['settings'])
+        if 'campaigns' in cloud:
+            _restore_campaigns(cloud['campaigns'])
+
+
 # --- Settings Helpers ---
 def get_settings():
     conn = get_connection()
@@ -130,6 +141,41 @@ def update_settings(data: dict):
         c.execute('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', (key, str(value)))
     conn.commit()
     conn.close()
+    # Sync to GitHub in background so it doesn't block the request
+    threading.Thread(target=_sync_to_github, daemon=True).start()
+
+
+def _sync_to_github():
+    """Collect all settings + campaigns and push to GitHub."""
+    try:
+        settings = get_settings()
+        campaigns = get_campaigns()
+        github_db.save_to_github({'settings': settings, 'campaigns': campaigns})
+    except Exception as e:
+        print(f"[GitHub DB Sync Error] {e}")
+
+
+def _restore_campaigns(campaigns: list):
+    """Restore campaigns from GitHub cloud DB into local SQLite."""
+    if not campaigns:
+        return
+    conn = get_connection()
+    c = conn.cursor()
+    for camp in campaigns:
+        c.execute('''
+            INSERT OR REPLACE INTO campaigns
+            (id, target_handle, mode, offer_title, price, advance_amount, upi_id, custom_pitch, daily_limit, is_active, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            camp.get('id'), camp.get('target_handle'), camp.get('mode'),
+            camp.get('offer_title'), camp.get('price'), camp.get('advance_amount'),
+            camp.get('upi_id'), camp.get('custom_pitch'), camp.get('daily_limit', 20),
+            camp.get('is_active', 1), camp.get('created_at', time.time())
+        ))
+    conn.commit()
+    conn.close()
+    print(f"[GitHub DB] Restored {len(campaigns)} campaigns from cloud.")
+
 
 # --- Campaigns Helpers ---
 def create_campaign(data: dict):
