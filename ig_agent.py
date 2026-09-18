@@ -67,6 +67,9 @@ class InstagramAgencyAgent:
         api_key = settings.get('gemini_api_key', '')
 
         try:
+            # Prevent endless looping if this errors out
+            self.last_outbound_time = time.time()
+            
             print(f"[Outbound] Finding target user ID for @{target_handle}...")
             target_pk = self.cl.user_id_from_username(target_handle)
             
