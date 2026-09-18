@@ -1,0 +1,1885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgencyPilot AI - Auto-Pilot Instagram Sales Agency</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-dark: #07090e;
+            --card-bg: rgba(15, 20, 31, 0.85);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --primary: #8b5cf6;
+            --primary-hover: #7c3aed;
+            --primary-glow: rgba(139, 92, 246, 0.25);
+            --accent-pink: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --font: 'Plus Jakarta Sans', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .ambient-glow {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(160px);
+            pointer-events: none;
+            opacity: 0.22;
+            z-index: 0;
+        }
+        .glow-1 { top: -120px; left: -100px; background: #8b5cf6; }
+        .glow-2 { bottom: -120px; right: -100px; background: #ec4899; }
+
+        header {
+            position: relative;
+            z-index: 10;
+            background: rgba(10, 14, 23, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .brand-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 4px 18px var(--primary-glow);
+        }
+
+        .brand h1 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .brand span {
+            font-size: 0.65rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            color: white;
+            padding: 2px 7px;
+            border-radius: 6px;
+            margin-left: 6px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 0.45rem 0.95rem;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--card-border);
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .dot.online { background-color: var(--success); box-shadow: 0 0 10px var(--success); }
+        .dot.offline { background-color: #ef4444; }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            border: none;
+            color: white;
+            padding: 0.55rem 1.15rem;
+            border-radius: 10px;
+            font-family: var(--font);
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.35);
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            filter: brightness(1.15);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 0.55rem 1rem;
+            border-radius: 10px;
+            font-family: var(--font);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        main {
+            position: relative;
+            z-index: 10;
+            flex: 1;
+            max-width: 1440px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Stats Ribbon */
+        .stats-ribbon {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.15rem 1.35rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-info .stat-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+            margin-bottom: 0.35rem;
+        }
+
+        .stat-info .stat-val {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+
+        /* Campaigns Section */
+        .campaigns-section {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 1.35rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .campaigns-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .campaigns-header h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .campaigns-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1rem;
+        }
+
+        .campaign-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.15rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            transition: all 0.2s;
+        }
+        .campaign-card:hover {
+            border-color: rgba(139, 92, 246, 0.3);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .camp-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .camp-handle {
+            font-weight: 800;
+            font-size: 1rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .mode-tag {
+            font-size: 0.68rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .mode-website { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
+        .mode-hooks { background: rgba(236, 72, 153, 0.2); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.4); }
+        .mode-fitness { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+        .mode-custom { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+
+        .camp-offer {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .camp-price-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 0.45rem 0.75rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .camp-progress {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .camp-progress-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .bar-bg {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8b5cf6, #ec4899);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .camp-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding-top: 0.75rem;
+        }
+
+        .btn-test-dm {
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            color: #c084fc;
+            padding: 0.35rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: all 0.2s;
+        }
+        .btn-test-dm:hover {
+            background: rgba(139, 92, 246, 0.25);
+            color: #fff;
+        }
+
+        /* Toggle switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 38px;
+            height: 20px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background-color: #334155;
+            transition: .3s;
+            border-radius: 20px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(18px); }
+
+        /* Two-Column Workplace Layout */
+        .dashboard-columns {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 1.5rem;
+            flex: 1;
+            min-height: 550px;
+        }
+
+        @media (max-width: 960px) {
+            .dashboard-columns {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Left Column: Leads List */
+        .leads-pane {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .pane-header {
+            padding: 1.1rem 1.35rem;
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pane-header h2 {
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 0.4rem;
+            padding: 0.75rem 1.25rem;
+            border-bottom: 1px solid var(--card-border);
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .filter-tabs::-webkit-scrollbar { display: none; }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-family: var(--font);
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 0.35rem 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover { color: #fff; }
+        .tab-btn.active {
+            background: rgba(139, 92, 246, 0.15);
+            color: var(--primary);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .leads-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .lead-item {
+            padding: 0.95rem 1.1rem;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .lead-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--card-border);
+        }
+        .lead-item.active {
+            background: rgba(139, 92, 246, 0.12);
+            border-color: var(--primary);
+        }
+
+        .lead-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.35rem;
+        }
+
+        .lead-name {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .stage-badge {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 2px 7px;
+            border-radius: 6px;
+        }
+        .stage-new { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
+        .stage-discovery { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+        .stage-pitched { background: rgba(236, 72, 153, 0.2); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.4); }
+        .stage-fulfilled { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+
+        .lead-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Right Column: Chat View */
+        .chat-pane {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-lead-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #fff;
+        }
+
+        .chat-body {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .msg-bubble {
+            max-width: 75%;
+            padding: 0.85rem 1.15rem;
+            border-radius: 16px;
+            font-size: 0.88rem;
+            line-height: 1.45;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+        .msg-user {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--card-border);
+            color: #f8fafc;
+            border-bottom-left-radius: 4px;
+        }
+        .msg-bot {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.25);
+        }
+
+        .chat-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--card-border);
+            color: #fff;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            font-family: var(--font);
+            font-size: 0.88rem;
+            outline: none;
+        }
+        .chat-input:focus {
+            border-color: var(--primary);
+        }
+
+        .btn-send {
+            background: var(--primary);
+            border: none;
+            color: white;
+            padding: 0 1.25rem;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .btn-send:hover { filter: brightness(1.15); }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: #0f172a;
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 520px;
+            padding: 1.75rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .modal-header h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 1.1rem;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            color: white;
+            padding: 0.7rem 0.85rem;
+            border-radius: 10px;
+            font-family: var(--font);
+            font-size: 0.88rem;
+            outline: none;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: var(--primary);
+        }
+        .form-group select option {
+            background: #0f172a;
+            color: white;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.85rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            border: none;
+            color: white;
+            padding: 0.65rem 1.25rem;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* Content Studio */
+        .content-studio-section {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 1.35rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .content-header h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .scrape-bar {
+            display: flex;
+            gap: 0.65rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .scrape-bar select, .scrape-bar input {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--card-border);
+            color: #fff;
+            padding: 0.5rem 0.85rem;
+            border-radius: 10px;
+            font-family: var(--font);
+            font-size: 0.85rem;
+            outline: none;
+        }
+        .scrape-bar input { width: 220px; }
+        .scrape-bar select { width: 160px; }
+        .scrape-bar input:focus { border-color: var(--primary); }
+
+        .content-filter-tabs {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .content-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.2s;
+        }
+        .content-card:hover {
+            border-color: rgba(139, 92, 246, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .content-thumb {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            background: rgba(255,255,255,0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 2rem;
+        }
+
+        .content-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .content-info {
+            padding: 0.85rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .content-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.73rem;
+            color: var(--text-muted);
+        }
+
+        .content-caption-preview {
+            font-size: 0.8rem;
+            color: #cbd5e1;
+            line-height: 1.4;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .content-status-badge {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 6px;
+            align-self: flex-start;
+        }
+        .status-queued { background: rgba(100,116,139,0.25); color: #94a3b8; border: 1px solid rgba(100,116,139,0.4); }
+        .status-downloaded { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
+        .status-uploaded { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+        .status-failed { background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid rgba(239,68,68,0.4); }
+
+        .content-actions {
+            display: flex;
+            gap: 0.4rem;
+            padding: 0.75rem;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            flex-wrap: wrap;
+        }
+
+        .btn-action-sm {
+            flex: 1;
+            min-width: 60px;
+            padding: 0.35rem 0.5rem;
+            border-radius: 8px;
+            font-size: 0.73rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid;
+            text-align: center;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .btn-dl { background: rgba(59,130,246,0.15); color: #60a5fa; border-color: rgba(59,130,246,0.4); }
+        .btn-dl:hover { background: rgba(59,130,246,0.3); }
+        .btn-ai-cap { background: rgba(139,92,246,0.15); color: #c084fc; border-color: rgba(139,92,246,0.4); }
+        .btn-ai-cap:hover { background: rgba(139,92,246,0.3); }
+        .btn-upload { background: rgba(16,185,129,0.15); color: #34d399; border-color: rgba(16,185,129,0.4); }
+        .btn-upload:hover { background: rgba(16,185,129,0.3); }
+        .btn-del { background: rgba(239,68,68,0.1); color: #f87171; border-color: rgba(239,68,68,0.3); }
+        .btn-del:hover { background: rgba(239,68,68,0.25); }
+
+        .upload-modal-card { max-width: 440px; }
+
+        .caption-preview-box {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 0.75rem;
+            font-size: 0.82rem;
+            color: #cbd5e1;
+            white-space: pre-wrap;
+            min-height: 80px;
+            line-height: 1.45;
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
+    <header>
+        <div class="brand">
+            <div class="brand-icon">
+                <i data-lucide="bot"></i>
+            </div>
+            <div>
+                <h1>AgencyPilot <span>AI</span></h1>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <button class="btn-primary" id="openAddCampaignBtn">
+                <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                <span>Add Target Profile / Offer</span>
+            </button>
+            <div class="status-pill">
+                <div class="dot" id="agentDot"></div>
+                <span id="agentStatusText">Connecting...</span>
+            </div>
+            <button class="btn-secondary" id="openSettingsBtn">
+                <i data-lucide="settings" style="width: 16px; height: 16px;"></i>
+                <span>Settings</span>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <!-- Quick Stats Ribbon -->
+        <section class="stats-ribbon">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">Total Leads (Pipeline)</div>
+                    <div class="stat-val" id="statTotalLeads">0</div>
+                </div>
+                <div class="stat-icon" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;">
+                    <i data-lucide="users"></i>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">Active Campaigns</div>
+                    <div class="stat-val" id="statActiveCampaigns">0</div>
+                </div>
+                <div class="stat-icon" style="background: rgba(236, 72, 153, 0.15); color: #f472b6;">
+                    <i data-lucide="target"></i>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">Cold DMs Sent Today</div>
+                    <div class="stat-val" id="statOutboundSent">0</div>
+                </div>
+                <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">
+                    <i data-lucide="send"></i>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">UPI Receiver</div>
+                    <div class="stat-val" id="statUpi" style="font-size: 1rem; font-family: var(--font-mono); color: #c084fc;">confusedaryan@fam</div>
+                </div>
+                <div class="stat-icon" style="background: rgba(139, 92, 246, 0.15); color: #a78bfa;">
+                    <i data-lucide="wallet"></i>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">Fulfilled Deliverables</div>
+                    <div class="stat-val" id="statFulfilled">0</div>
+                </div>
+                <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">
+                    <i data-lucide="check-circle"></i>
+                </div>
+            </div>
+        </section>
+
+        <!-- Campaigns & Target Channels Grid -->
+        <section class="campaigns-section">
+            <div class="campaigns-header">
+                <h2>
+                    <i data-lucide="crosshair" style="width: 20px; height: 20px; color: var(--accent-pink);"></i>
+                    <span>Target Profiles & Campaigns</span>
+                </h2>
+                <span style="font-size: 0.8rem; color: var(--text-muted);" id="campaignsCountLabel">0 active targets</span>
+            </div>
+
+            <div class="campaigns-grid" id="campaignsGrid">
+                <!-- Dynamic Campaign Cards -->
+            </div>
+        </section>
+
+
+        <!-- Content Studio Section -->
+        <section class="content-studio-section">
+            <div class="content-header">
+                <h2>
+                    <i data-lucide="film" style="width: 20px; height: 20px; color: #c084fc;"></i>
+                    <span>Content Studio</span>
+                    <span style="font-size: 0.65rem; font-weight: 800; background: linear-gradient(135deg, #8b5cf6, #ec4899); padding: 2px 8px; border-radius: 6px; color: white; margin-left: 4px;">SCRAPE & POST</span>
+                </h2>
+                <div class="scrape-bar">
+                    <select id="scrapeSourceType">
+                        <option value="hashtag">🏷️ By Hashtag</option>
+                        <option value="username">👤 By Username</option>
+                        <option value="url">🔗 By Post URL</option>
+                    </select>
+                    <input type="text" id="scrapeQuery" placeholder="e.g. #fashion or @brand or paste URL">
+                    <input type="number" id="scrapeAmount" value="10" min="1" max="50" style="width: 70px;">
+                    <button class="btn-primary" id="scrapeBtn" style="padding: 0.5rem 1rem;">
+                        <i data-lucide="search" style="width: 14px; height: 14px;"></i>
+                        <span>Scrape</span>
+                    </button>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                <div class="content-filter-tabs">
+                    <button class="tab-btn active" data-cfilter="all" onclick="setContentFilter('all', this)">All</button>
+                    <button class="tab-btn" data-cfilter="queued" onclick="setContentFilter('queued', this)">🕐 Queued</button>
+                    <button class="tab-btn" data-cfilter="downloaded" onclick="setContentFilter('downloaded', this)">⬇️ Downloaded</button>
+                    <button class="tab-btn" data-cfilter="uploaded" onclick="setContentFilter('uploaded', this)">✅ Uploaded</button>
+                    <button class="tab-btn" data-cfilter="upload_failed" onclick="setContentFilter('upload_failed', this)">❌ Failed</button>
+                </div>
+                <span style="font-size: 0.8rem; color: var(--text-muted);" id="contentCountLabel">0 items</span>
+            </div>
+
+            <div class="content-grid" id="contentGrid">
+                <!-- Dynamic content cards -->
+            </div>
+        </section>
+
+        <!-- Upload Modal -->
+        <div class="modal-overlay" id="uploadModal">
+            <div class="modal-card upload-modal-card">
+                <div class="modal-header">
+                    <h3>📤 Upload to Instagram</h3>
+                    <button style="background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer;" id="closeUploadModal">&times;</button>
+                </div>
+                <input type="hidden" id="uploadItemId">
+                <div class="form-group">
+                    <label>Post Type</label>
+                    <select id="uploadPostType">
+                        <option value="feed">📸 Feed Post</option>
+                        <option value="reel">🎬 Reel</option>
+                        <option value="story">📖 Story</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Caption (AI-generated or custom)</label>
+                    <div class="caption-preview-box" id="uploadCaptionBox" contenteditable="true">Loading caption...</div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" id="cancelUploadModal">Cancel</button>
+                    <button class="btn-save" id="confirmUploadBtn">🚀 Post Now</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Workplace: Leads & Chat Columns -->
+        <section class="dashboard-columns">
+            <!-- Left: Leads List -->
+            <div class="leads-pane">
+                <div class="pane-header">
+                    <h2>Live Conversations</h2>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);" id="leadsCountLabel">0 leads</span>
+                </div>
+                <div class="filter-tabs">
+                    <button class="tab-btn active" data-filter="all">All</button>
+                    <button class="tab-btn" data-filter="NEW">New</button>
+                    <button class="tab-btn" data-filter="DISCOVERY">Consulting</button>
+                    <button class="tab-btn" data-filter="PITCHED">Pitched</button>
+                    <button class="tab-btn" data-filter="FULFILLED">Fulfilled</button>
+                </div>
+                <div class="leads-list" id="leadsList">
+                    <!-- Dynamic lead items -->
+                </div>
+            </div>
+
+            <!-- Right: Chat Window -->
+            <div class="chat-pane">
+                <div class="chat-header">
+                    <div class="chat-lead-info">
+                        <div class="avatar" id="chatAvatar">?</div>
+                        <div>
+                            <div style="font-weight: 700; font-size: 0.95rem;" id="chatUsername">Select a conversation</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);" id="chatStageTag">No lead active</div>
+                        </div>
+                    </div>
+                    <div id="chatActions" style="display: none;">
+                        <button class="btn-secondary" id="fulfillBtn" style="color: #34d399; border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.1);">
+                            <i data-lucide="zap" style="width: 14px; height: 14px;"></i>
+                            <span>Mark Advance Paid & Fulfill</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="chat-body" id="chatBody">
+                    <div style="text-align: center; color: var(--text-muted); margin-top: 5rem;">
+                        <i data-lucide="message-square" style="width: 42px; height: 42px; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                        <p>Select any lead from the left pane to view live AI sales messages or take over manually.</p>
+                    </div>
+                </div>
+
+                <form class="chat-footer" id="chatForm">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Type a message to manually chat..." disabled>
+                    <button type="submit" class="btn-send" id="sendBtn" disabled>
+                        <span>Send</span>
+                        <i data-lucide="send" style="width: 14px; height: 14px;"></i>
+                    </button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal 1: Add Target Profile / Campaign -->
+    <div class="modal-overlay" id="addCampaignModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>+ Add Target Profile / Channel</h3>
+                <button style="background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer;" id="closeAddCampaignBtn">&times;</button>
+            </div>
+            <form id="addCampaignForm">
+                <div class="form-group">
+                    <label>Target Instagram Handle (Competitor / Store / Creator)</label>
+                    <input type="text" id="campTargetHandle" placeholder="e.g. thesouledstore or thrift_clothing_in" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Select Offer Mode / Strategy</label>
+                    <select id="campModeSelector">
+                        <option value="WEBSITE_DEV" selected>🛍️ E-commerce Website Setup (Small IG DM Sellers)</option>
+                        <option value="REEL_HOOKS">🪝 30 Viral Reel Hooks & Script Pack (Creators & Theme Pages)</option>
+                        <option value="FITNESS_PLAN">🏋️ Custom Diet & Workout Protocol (Fitness Enthusiasts)</option>
+                        <option value="CUSTOM">⚡ Custom Offer / Pitch (Custom Prompt & Pricing)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Offer Title</label>
+                    <input type="text" id="campOfferTitle" value="E-commerce Website Setup" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Total Price</label>
+                        <input type="text" id="campPrice" value="₹1,999" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Booking Advance</label>
+                        <input type="text" id="campAdvance" value="₹499" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Daily Cold DM Limit</label>
+                        <input type="number" id="campDailyLimit" value="20" min="1" max="50" required>
+                    </div>
+                    <div class="form-group">
+                        <label>UPI ID for Payments</label>
+                        <input type="text" id="campUpiId" value="confusedaryan@fam" required>
+                    </div>
+                </div>
+
+                <div class="form-group" id="customPitchGroup" style="display: none;">
+                    <label>Custom Pitch Instructions (Optional)</label>
+                    <textarea id="campCustomPitch" rows="2" placeholder="Custom instructions for AI on how to pitch this specific offer..."></textarea>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" id="cancelAddCampaignBtn">Cancel</button>
+                    <button type="submit" class="btn-save">Launch Campaign 🚀</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 2: Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Agency Settings</h3>
+                <button style="background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer;" id="closeSettingsBtn">&times;</button>
+            </div>
+            <form id="settingsForm">
+                <div class="form-group">
+                    <label>Instagram Session ID Cookie</label>
+                    <input type="password" id="modalSessionId" placeholder="Paste your Instagram sessionid cookie">
+                </div>
+                <div class="form-group">
+                    <label>Default Payment UPI ID</label>
+                    <input type="text" id="modalUpiId" value="confusedaryan@fam" required>
+                </div>
+                <div class="form-group">
+                    <label>Gemini AI API Key</label>
+                    <input type="password" id="modalGeminiKey" placeholder="AI Studio Key (optional if in env)">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" id="cancelSettingsBtn">Cancel</button>
+                    <button type="submit" class="btn-save">Save Settings</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        let currentActiveThread = null;
+        let allLeads = [];
+        let allCampaigns = [];
+        let activeFilter = 'all';
+
+        // Mode preset data
+        const MODE_PRESETS = {
+            'WEBSITE_DEV': {
+                title: 'E-commerce Website Setup',
+                price: '₹1,999',
+                advance: '₹499'
+            },
+            'REEL_HOOKS': {
+                title: '30 Viral Reel Hooks & Script Pack',
+                price: '₹299',
+                advance: '₹299'
+            },
+            'FITNESS_PLAN': {
+                title: '4-Week Custom Workout & Diet Protocol',
+                price: '₹299',
+                advance: '₹299'
+            },
+            'CUSTOM': {
+                title: 'Custom Digital Agency Offer',
+                price: '₹999',
+                advance: '₹299'
+            }
+        };
+
+        // Handle Mode change in Add Campaign modal
+        document.getElementById('campModeSelector').addEventListener('change', (e) => {
+            const mode = e.target.value;
+            const preset = MODE_PRESETS[mode] || MODE_PRESETS['WEBSITE_DEV'];
+            document.getElementById('campOfferTitle').value = preset.title;
+            document.getElementById('campPrice').value = preset.price;
+            document.getElementById('campAdvance').value = preset.advance;
+            document.getElementById('customPitchGroup').style.display = (mode === 'CUSTOM') ? 'block' : 'none';
+        });
+
+        // Load Status & Metrics
+        async function fetchStatus() {
+            try {
+                const res = await fetch('/api/status');
+                const data = await res.json();
+                
+                const dot = document.getElementById('agentDot');
+                const statusText = document.getElementById('agentStatusText');
+                
+                if (data.is_logged_in) {
+                    dot.className = 'dot online';
+                    statusText.textContent = `@${data.bot_username || 'Agent'} (Online)`;
+                } else {
+                    dot.className = 'dot offline';
+                    statusText.textContent = 'Session Required';
+                }
+
+                document.getElementById('statTotalLeads').textContent = data.total_leads;
+                document.getElementById('statActiveCampaigns').textContent = `${data.active_campaigns} / ${data.total_campaigns}`;
+                document.getElementById('statOutboundSent').textContent = data.outbound_sent_today;
+                document.getElementById('statUpi').textContent = data.upi_id;
+                document.getElementById('statFulfilled').textContent = data.fulfilled_leads;
+            } catch (e) {}
+        }
+
+        // Load Campaigns
+        async function fetchCampaigns() {
+            try {
+                const res = await fetch('/api/campaigns');
+                allCampaigns = await res.json();
+                renderCampaigns();
+            } catch (e) {}
+        }
+
+        function renderCampaigns() {
+            const grid = document.getElementById('campaignsGrid');
+            grid.innerHTML = '';
+
+            document.getElementById('campaignsCountLabel').textContent = `${allCampaigns.filter(c => c.is_active).length} active targets`;
+
+            if (allCampaigns.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 2.5rem; background: rgba(255,255,255,0.02); border-radius: 14px;">
+                        <i data-lucide="target" style="width: 36px; height: 36px; opacity: 0.4; margin-bottom: 0.5rem;"></i>
+                        <p style="font-weight: 600;">No Target Campaigns Added Yet</p>
+                        <p style="font-size: 0.8rem; margin-top: 0.25rem;">Click "+ Add Target Profile / Offer" above to target small businesses, creators, or fitness audiences!</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            allCampaigns.forEach(c => {
+                const card = document.createElement('div');
+                card.className = 'campaign-card';
+
+                let modeClass = 'mode-website';
+                let modeLabel = '🛍️ Website Dev';
+                if (c.mode === 'REEL_HOOKS') { modeClass = 'mode-hooks'; modeLabel = '🪝 Reel Hooks'; }
+                else if (c.mode === 'FITNESS_PLAN') { modeClass = 'mode-fitness'; modeLabel = '🏋️ Fitness Plan'; }
+                else if (c.mode === 'CUSTOM') { modeClass = 'mode-custom'; modeLabel = '⚡ Custom'; }
+
+                const sent = c.dms_sent_today || 0;
+                const limit = c.daily_limit || 20;
+                const pct = Math.min(100, Math.round((sent / limit) * 100));
+
+                card.innerHTML = `
+                    <div class="camp-top">
+                        <div>
+                            <div class="camp-handle">
+                                <i data-lucide="instagram" style="width: 16px; height: 16px; color: #ec4899;"></i>
+                                <span>@${c.target_handle}</span>
+                            </div>
+                            <div class="camp-offer" style="margin-top: 2px;">${c.offer_title}</div>
+                        </div>
+                        <span class="mode-tag ${modeClass}">${modeLabel}</span>
+                    </div>
+
+                    <div class="camp-price-row">
+                        <span>Price: <strong style="color: #fff;">${c.price}</strong> (Adv: ${c.advance_amount || '₹499'})</span>
+                        <span style="font-family: var(--font-mono); color: #c084fc;">${c.upi_id}</span>
+                    </div>
+
+                    <div class="camp-progress">
+                        <div class="camp-progress-labels">
+                            <span>Daily Outreach Pace</span>
+                            <strong>${sent} / ${limit} sent</strong>
+                        </div>
+                        <div class="bar-bg">
+                            <div class="bar-fill" style="width: ${pct}%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="camp-actions">
+                        <button class="btn-test-dm" onclick="triggerTestOutbound('${c.id}')">
+                            <i data-lucide="send" style="width: 12px; height: 12px;"></i>
+                            <span>Send 1 Test DM</span>
+                        </button>
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <label class="switch">
+                                <input type="checkbox" ${c.is_active ? 'checked' : ''} onchange="toggleCampaign('${c.id}', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                            <button onclick="deleteCampaign('${c.id}')" style="background: transparent; border: none; color: #ef4444; cursor: pointer;">
+                                <i data-lucide="trash-2" style="width: 15px; height: 15px;"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        async function toggleCampaign(campId, isActive) {
+            await fetch(`/api/campaigns/${campId}/toggle`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ is_active: isActive ? 1 : 0 })
+            });
+            fetchCampaigns();
+            fetchStatus();
+        }
+
+        async function deleteCampaign(campId) {
+            if (confirm('Delete this target campaign?')) {
+                await fetch(`/api/campaigns/${campId}`, { method: 'DELETE' });
+                fetchCampaigns();
+                fetchStatus();
+            }
+        }
+
+        async function triggerTestOutbound(campId) {
+            alert('Triggering 1 cold DM for this campaign! Please ensure Instagram session is logged in.');
+            try {
+                const res = await fetch(`/api/campaigns/${campId}/run_outbound`, { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    alert(`✅ Successfully sent ${data.sent} cold DM! Check the live conversations list.`);
+                } else {
+                    alert(`⚠️ ${data.error || 'Failed to send outbound DM'}`);
+                }
+                fetchCampaigns();
+                fetchLeads();
+                fetchStatus();
+            } catch (e) {
+                alert('Outbound error: ' + e);
+            }
+        }
+
+        // Load Leads
+        async function fetchLeads() {
+            try {
+                const res = await fetch('/api/leads');
+                allLeads = await res.json();
+                renderLeads();
+            } catch (e) {}
+        }
+
+        function renderLeads() {
+            const list = document.getElementById('leadsList');
+            list.innerHTML = '';
+
+            const filtered = allLeads.filter(l => {
+                if (activeFilter === 'all') return true;
+                return l.stage === activeFilter;
+            });
+
+            document.getElementById('leadsCountLabel').textContent = `${filtered.length} leads`;
+
+            if (filtered.length === 0) {
+                list.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 2rem;">No leads in this stage.</div>`;
+                return;
+            }
+
+            filtered.forEach(lead => {
+                const div = document.createElement('div');
+                div.className = `lead-item ${currentActiveThread === lead.thread_id ? 'active' : ''}`;
+                div.onclick = () => selectLead(lead);
+
+                let stageClass = 'stage-new';
+                if (lead.stage === 'DISCOVERY') stageClass = 'stage-discovery';
+                else if (lead.stage === 'PITCHED') stageClass = 'stage-pitched';
+                else if (lead.stage === 'FULFILLED') stageClass = 'stage-fulfilled';
+
+                let modeBadge = lead.mode === 'WEBSITE_DEV' ? '🛍️ Website' : (lead.mode === 'REEL_HOOKS' ? '🪝 Hooks' : (lead.mode === 'FITNESS_PLAN' ? '🏋️ Fitness' : '⚡ Custom'));
+
+                div.innerHTML = `
+                    <div class="lead-top">
+                        <span class="lead-name">
+                            ${lead.is_outbound ? '<i data-lucide="arrow-up-right" style="width: 14px; height: 14px; color: #ec4899;"></i>' : '<i data-lucide="arrow-down-left" style="width: 14px; height: 14px; color: #10b981;"></i>'}
+                            @${lead.username || 'user'}
+                        </span>
+                        <span class="stage-badge ${stageClass}">${lead.stage}</span>
+                    </div>
+                    <div class="lead-meta">
+                        <span>${modeBadge}</span>
+                        <span>${lead.niche || (lead.is_outbound ? 'Cold Outreach' : 'Inbound DM')}</span>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+            lucide.createIcons();
+        }
+
+        async function selectLead(lead) {
+            currentActiveThread = lead.thread_id;
+            renderLeads();
+
+            document.getElementById('chatAvatar').textContent = (lead.username || 'U')[0].toUpperCase();
+            document.getElementById('chatUsername').textContent = `@${lead.username || 'Client'}`;
+            document.getElementById('chatStageTag').textContent = `Stage: ${lead.stage} | Mode: ${lead.mode || 'WEBSITE_DEV'}`;
+            document.getElementById('chatActions').style.display = 'block';
+            document.getElementById('chatInput').disabled = false;
+            document.getElementById('sendBtn').disabled = false;
+
+            await loadMessages(lead.thread_id);
+        }
+
+        async function loadMessages(threadId) {
+            try {
+                const res = await fetch(`/api/leads/${threadId}/messages`);
+                const messages = await res.json();
+                const chatBody = document.getElementById('chatBody');
+                chatBody.innerHTML = '';
+
+                if (messages.length === 0) {
+                    chatBody.innerHTML = `<div style="text-align: center; color: var(--text-muted); margin-top: 3rem;">No messages recorded yet.</div>`;
+                    return;
+                }
+
+                messages.forEach(m => {
+                    const bubble = document.createElement('div');
+                    bubble.className = `msg-bubble ${m.sender === 'user' ? 'msg-user' : 'msg-bot'}`;
+                    bubble.textContent = m.text;
+                    chatBody.appendChild(bubble);
+                });
+
+                chatBody.scrollTop = chatBody.scrollHeight;
+            } catch (e) {}
+        }
+
+        // Send manual message
+        document.getElementById('chatForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text || !currentActiveThread) return;
+
+            input.value = '';
+            await fetch(`/api/leads/${currentActiveThread}/send`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text })
+            });
+
+            loadMessages(currentActiveThread);
+        };
+
+        // Fulfill button
+        document.getElementById('fulfillBtn').onclick = async () => {
+            if (!currentActiveThread) return;
+            if (confirm('Mark this lead as PAID/ADVANCE CONFIRMED and trigger instant deliverable fulfillment?')) {
+                await fetch(`/api/leads/${currentActiveThread}/stage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ stage: 'FULFILLED' })
+                });
+                fetchLeads();
+            }
+        };
+
+        // Filter pills
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                activeFilter = btn.dataset.filter;
+                renderLeads();
+            };
+        });
+
+        // Add Campaign Modal Handlers
+        const addCampModal = document.getElementById('addCampaignModal');
+        document.getElementById('openAddCampaignBtn').onclick = () => addCampModal.classList.add('open');
+        document.getElementById('closeAddCampaignBtn').onclick = () => addCampModal.classList.remove('open');
+        document.getElementById('cancelAddCampaignBtn').onclick = () => addCampModal.classList.remove('open');
+
+        document.getElementById('addCampaignForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const payload = {
+                target_handle: document.getElementById('campTargetHandle').value.trim(),
+                mode: document.getElementById('campModeSelector').value,
+                offer_title: document.getElementById('campOfferTitle').value.trim(),
+                price: document.getElementById('campPrice').value.trim(),
+                advance_amount: document.getElementById('campAdvance').value.trim(),
+                daily_limit: parseInt(document.getElementById('campDailyLimit').value, 10) || 20,
+                upi_id: document.getElementById('campUpiId').value.trim() || 'confusedaryan@fam',
+                custom_pitch: document.getElementById('campCustomPitch').value.trim()
+            };
+
+            await fetch('/api/campaigns', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            addCampModal.classList.remove('open');
+            document.getElementById('campTargetHandle').value = '';
+            fetchCampaigns();
+            fetchStatus();
+        };
+
+        // Settings Modal Handlers
+        const modal = document.getElementById('settingsModal');
+        document.getElementById('openSettingsBtn').onclick = async () => {
+            const res = await fetch('/api/settings');
+            const s = await res.json();
+            document.getElementById('modalUpiId').value = s.upi_id || 'confusedaryan@fam';
+            modal.classList.add('open');
+        };
+        document.getElementById('closeSettingsBtn').onclick = () => modal.classList.remove('open');
+        document.getElementById('cancelSettingsBtn').onclick = () => modal.classList.remove('open');
+
+        document.getElementById('settingsForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const payload = {
+                upi_id: document.getElementById('modalUpiId').value
+            };
+            const sid = document.getElementById('modalSessionId').value.trim();
+            if (sid) payload.session_id = sid;
+            const gk = document.getElementById('modalGeminiKey').value.trim();
+            if (gk) payload.gemini_api_key = gk;
+
+            await fetch('/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            modal.classList.remove('open');
+            fetchStatus();
+        };
+
+
+        // =============================================
+        // CONTENT STUDIO LOGIC
+        // =============================================
+        let allContentItems = [];
+        let contentFilter = 'all';
+
+        async function fetchContentItems() {
+            try {
+                const res = await fetch('/api/content');
+                allContentItems = await res.json();
+                renderContentGrid();
+            } catch(e) {}
+        }
+
+        function setContentFilter(f, btn) {
+            contentFilter = f;
+            document.querySelectorAll('[data-cfilter]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderContentGrid();
+        }
+
+        function renderContentGrid() {
+            const grid = document.getElementById('contentGrid');
+            grid.innerHTML = '';
+
+            const filtered = contentFilter === 'all'
+                ? allContentItems
+                : allContentItems.filter(i => i.upload_status === contentFilter);
+
+            document.getElementById('contentCountLabel').textContent = `${filtered.length} items`;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 2.5rem; background: rgba(255,255,255,0.02); border-radius: 14px;">
+                        <i data-lucide="film" style="width: 36px; height: 36px; opacity: 0.35; margin-bottom: 0.5rem;"></i>
+                        <p style="font-weight: 600;">No content yet</p>
+                        <p style="font-size: 0.8rem; margin-top: 0.25rem;">Use the Scrape bar above to search Instagram by hashtag, username, or post URL!</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'content-card';
+
+                let statusClass = 'status-queued';
+                let statusLabel = 'Queued';
+                if (item.upload_status === 'downloaded') { statusClass = 'status-downloaded'; statusLabel = 'Downloaded'; }
+                else if (item.upload_status === 'uploaded') { statusClass = 'status-uploaded'; statusLabel = 'Posted'; }
+                else if (item.upload_status?.includes('failed')) { statusClass = 'status-failed'; statusLabel = 'Failed'; }
+
+                const typeIcon = item.media_type === 'video' ? '🎬' : '📸';
+                const captionText = item.ai_caption || item.original_caption || '';
+                const shortCap = captionText.length > 70 ? captionText.slice(0, 70) + '...' : captionText;
+
+                const isDownloaded = ['downloaded', 'uploaded', 'upload_failed'].includes(item.upload_status);
+                const isUploaded = item.upload_status === 'uploaded';
+
+                card.innerHTML = `
+                    <div class="content-thumb">
+                        ${item.thumbnail_path
+                            ? `<img src="/media_serve/${item.id}/thumb" onerror="this.parentElement.innerHTML='${typeIcon}'" alt="thumb">`
+                            : `<span>${typeIcon}</span>`}
+                    </div>
+                    <div class="content-info">
+                        <div class="content-meta">
+                            <span>@${item.source_username || '?'}</span>
+                            <span>${item.source_type === 'hashtag' ? '#' + item.source_query : item.source_type}</span>
+                        </div>
+                        <div class="content-caption-preview">${shortCap || '(no caption)'}</div>
+                        <span class="content-status-badge ${statusClass}">${statusLabel}</span>
+                    </div>
+                    <div class="content-actions">
+                        ${!isDownloaded ? `<button class="btn-action-sm btn-dl" onclick="downloadItem('${item.id}')">⬇️ Download</button>` : ''}
+                        ${isDownloaded && !isUploaded ? `<button class="btn-action-sm btn-ai-cap" onclick="generateCaption('${item.id}')">✨ AI Caption</button>` : ''}
+                        ${isDownloaded && !isUploaded ? `<button class="btn-action-sm btn-upload" onclick="openUploadModal('${item.id}')">📤 Upload</button>` : ''}
+                        <button class="btn-action-sm btn-del" onclick="deleteContentItem('${item.id}')">🗑️</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        // Scrape
+        document.getElementById('scrapeBtn').onclick = async () => {
+            const sourceType = document.getElementById('scrapeSourceType').value;
+            const query = document.getElementById('scrapeQuery').value.trim();
+            const amount = parseInt(document.getElementById('scrapeAmount').value, 10) || 10;
+
+            if (!query) { alert('Please enter a hashtag, username, or URL to scrape!'); return; }
+
+            const btn = document.getElementById('scrapeBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span>Scraping...</span>';
+
+            try {
+                const res = await fetch('/api/content/scrape', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ source_type: sourceType, query, amount })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(`✅ Scraped ${data.scraped} new items (${data.total} found total)! Now you can download & post them.`);
+                } else {
+                    alert(`⚠️ Scrape failed: ${data.error || 'Unknown error'}. Make sure Instagram session is logged in.`);
+                }
+                fetchContentItems();
+            } catch(e) {
+                alert('Scrape error: ' + e);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="search" style="width: 14px; height: 14px;"></i><span>Scrape</span>';
+                lucide.createIcons();
+            }
+        };
+
+        async function downloadItem(itemId) {
+            if (!confirm('Download this media file to the server?')) return;
+            const res = await fetch(`/api/content/${itemId}/download`, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                alert('⏳ Download started in the background! The status will update to "Downloaded" shortly.');
+            } else {
+                alert('❌ Download failed: ' + (data.error || 'Unknown error'));
+            }
+            fetchContentItems();
+        }
+
+        async function generateCaption(itemId) {
+            const niche = prompt('Enter your content niche for better captions (e.g. "streetwear fashion India", "fitness workout"):', '');
+            const res = await fetch(`/api/content/${itemId}/caption`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ niche: niche || '', custom_instructions: '' })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('✨ AI Caption generated!\\n\\n' + data.caption);
+            } else {
+                alert('Caption generation failed');
+            }
+            fetchContentItems();
+        }
+
+        function openUploadModal(itemId) {
+            const item = allContentItems.find(i => i.id === itemId);
+            if (!item) return;
+
+            document.getElementById('uploadItemId').value = itemId;
+            const captionBox = document.getElementById('uploadCaptionBox');
+            captionBox.textContent = item.ai_caption || item.original_caption || 'Add your caption here...';
+
+            // Set post type based on media
+            if (item.media_type === 'video') {
+                document.getElementById('uploadPostType').value = 'reel';
+            } else {
+                document.getElementById('uploadPostType').value = 'feed';
+            }
+
+            document.getElementById('uploadModal').classList.add('open');
+        }
+
+        document.getElementById('closeUploadModal').onclick = () => document.getElementById('uploadModal').classList.remove('open');
+        document.getElementById('cancelUploadModal').onclick = () => document.getElementById('uploadModal').classList.remove('open');
+
+        document.getElementById('confirmUploadBtn').onclick = async () => {
+            const itemId = document.getElementById('uploadItemId').value;
+            const postType = document.getElementById('uploadPostType').value;
+            const caption = document.getElementById('uploadCaptionBox').textContent.trim();
+
+            const btn = document.getElementById('confirmUploadBtn');
+            btn.disabled = true;
+            btn.textContent = 'Uploading...';
+
+            try {
+                const res = await fetch(`/api/content/${itemId}/upload`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ post_type: postType, caption })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(`⏳ Upload started in the background! Status will update to "Posted" once complete.`);
+                    document.getElementById('uploadModal').classList.remove('open');
+                } else {
+                    alert('❌ Upload failed: ' + (data.error || 'Unknown'));
+                }
+                fetchContentItems();
+                fetchStatus();
+            } catch(e) {
+                alert('Upload error: ' + e);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🚀 Post Now';
+            }
+        };
+
+        async function deleteContentItem(itemId) {
+            if (!confirm('Delete this content item and its local file?')) return;
+            await fetch(`/api/content/${itemId}`, { method: 'DELETE' });
+            fetchContentItems();
+        }
+
+        // Add content to polling loop
+        const _origInterval = setInterval;
+
+        // Polling loop
+        fetchStatus();
+        fetchCampaigns();
+        fetchLeads();
+        fetchContentItems();
+        setInterval(() => {
+            fetchStatus();
+            fetchCampaigns();
+            fetchLeads();
+            fetchContentItems();
+            if (currentActiveThread) loadMessages(currentActiveThread);
+        }, 6000);
+
+        function checkPaymentStage(threadId) {
+            const lead = allLeads.find(l => l.thread_id === threadId);
+            const actionDiv = document.getElementById('paymentActions');
+            if (lead && lead.stage === 'PENDING_APPROVAL') {
+                actionDiv.style.display = 'flex';
+            } else {
+                actionDiv.style.display = 'none';
+            }
+        }
+
+        // Intercept loadMessages to check payment stage
+        const _origLoadMessages = loadMessages;
+        loadMessages = async function(threadId) {
+            checkPaymentStage(threadId);
+            return _origLoadMessages(threadId);
+        };
+
+        async function approvePayment() {
+            if (!currentActiveThread) return;
+            if (!confirm('Approve payment and deliver digital product to this user?')) return;
+            
+            const btn = event.target;
+            btn.textContent = 'Approving...';
+            btn.disabled = true;
+
+            const res = await fetch(`/api/leads/${currentActiveThread}/approve`, { method: 'POST' });
+            if (res.ok) {
+                alert('✅ Approved! The AI is delivering the product in the background.');
+            } else {
+                alert('Approval failed.');
+            }
+            btn.disabled = false;
+            btn.textContent = '✅ Approve';
+            fetchLeads();
+            loadMessages(currentActiveThread);
+        }
+
+        async function rejectPayment() {
+            if (!currentActiveThread) return;
+            if (!confirm('Reject payment? This will ask them for a screenshot.')) return;
+
+            const btn = event.target;
+            btn.textContent = 'Rejecting...';
+            btn.disabled = true;
+
+            const res = await fetch(`/api/leads/${currentActiveThread}/reject`, { method: 'POST' });
+            if (res.ok) {
+                alert('❌ Rejected! Requested a screenshot from the user.');
+            } else {
+                alert('Rejection failed.');
+            }
+            btn.disabled = false;
+            btn.textContent = '❌ Reject';
+            fetchLeads();
+            loadMessages(currentActiveThread);
+        }
+    </script>
+</body>
+</html>
