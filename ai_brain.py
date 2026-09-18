@@ -44,8 +44,16 @@ RULES:
         res = call_groq_simple(api_key, prompt, 0.7)
         if res: return res
         
+    if api_key and api_key.strip().upper() == "JUGAAD":
+        res = call_jugaad_api("You are a helpful expert.", [{"role": "user", "text": prompt}], 0.7)
+        if res: return res
+        
     if api_key and api_key.startswith("gsk_"):
         res = call_groq_simple(api_key, prompt, 0.85)
+        if res: return res
+        
+    if api_key and api_key.strip().upper() == "JUGAAD":
+        res = call_jugaad_api("You are a viral social media expert.", [{"role": "user", "text": prompt}], 0.85)
         if res: return res
         
     try:
@@ -172,6 +180,9 @@ def generate_ai_reply(lead: dict, chat_history: list, incoming_msg: str, campaig
     if api_key and api_key.startswith("gsk_"):
         return call_groq_api(api_key, system_instruction, raw_messages, temperature=0.75)
         
+    if api_key and api_key.strip().upper() == "JUGAAD":
+        return call_jugaad_api(system_instruction, raw_messages, temperature=0.75)
+        
     # GEMINI LOGIC
     client = get_genai_client(api_key)
     if not client:
@@ -234,6 +245,35 @@ def call_groq_simple(api_key: str, prompt: str, temperature: float = 0.75) -> st
     except Exception as e:
         print(f"[Groq Simple Error] {e}")
         return ""
+
+
+def call_jugaad_api(system_prompt: str, raw_messages: list, temperature: float = 0.75) -> str:
+    url = "https://text.pollinations.ai/"
+    
+    payload_messages = [{"role": "system", "content": system_prompt}]
+    for msg in raw_messages:
+        payload_messages.append({"role": msg["role"], "content": msg["text"]})
+        
+    payload = {
+        "model": "openai",
+        "messages": payload_messages,
+        "temperature": temperature
+    }
+    
+    import requests
+    import time
+    for attempt in range(2):
+        try:
+            resp = requests.post(url, json=payload, timeout=15)
+            resp.raise_for_status()
+            return resp.text.strip()
+        except Exception as e:
+            if attempt == 0:
+                time.sleep(2)
+                continue
+            print(f"[Jugaad Error] {e}")
+            return ""
+    return ""
 
 def generate_digital_product(lead: dict, campaign: dict = None, api_key: str = None) -> str:
     """Generates the comprehensive deliverable once payment/advance is confirmed."""
@@ -300,8 +340,16 @@ Make it practical, structured, and immediately useful. Around 350-450 words.
         res = call_groq_simple(api_key, prompt, 0.7)
         if res: return res
         
+    if api_key and api_key.strip().upper() == "JUGAAD":
+        res = call_jugaad_api("You are a helpful expert.", [{"role": "user", "text": prompt}], 0.7)
+        if res: return res
+        
     if api_key and api_key.startswith("gsk_"):
         res = call_groq_simple(api_key, prompt, 0.85)
+        if res: return res
+        
+    if api_key and api_key.strip().upper() == "JUGAAD":
+        res = call_jugaad_api("You are a viral social media expert.", [{"role": "user", "text": prompt}], 0.85)
         if res: return res
         
     try:
@@ -364,8 +412,16 @@ REQUIREMENTS:
         res = call_groq_simple(api_key, prompt, 0.7)
         if res: return res
         
+    if api_key and api_key.strip().upper() == "JUGAAD":
+        res = call_jugaad_api("You are a helpful expert.", [{"role": "user", "text": prompt}], 0.7)
+        if res: return res
+        
     if api_key and api_key.startswith("gsk_"):
         res = call_groq_simple(api_key, prompt, 0.85)
+        if res: return res
+        
+    if api_key and api_key.strip().upper() == "JUGAAD":
+        res = call_jugaad_api("You are a viral social media expert.", [{"role": "user", "text": prompt}], 0.85)
         if res: return res
         
     try:
